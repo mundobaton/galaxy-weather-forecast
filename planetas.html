@@ -1,0 +1,183 @@
+<html>
+<head>
+
+<meta http-equiv="refresh" content="600" />
+	
+	<!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	
+	<!-- Boostrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+	<!-- Optional theme -->
+	<script src="d3.v4.js"></script>
+	
+	<style>
+		.canvas{
+			min-height: 600;
+			min-width: 700;
+			padding: 5px;
+			box-shadow: 0 0 3px black;
+		
+		}
+	
+	
+	</style>
+	
+	
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://d3js.org/">Armado con d3.js</a>
+    </div>
+  </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+	<div class="col-lg-5">
+	<h1>En una galaxia lejana.... 
+		<button class="btn btn-primary pull-right" onclick="go()">Go</button>
+	</h1>
+	</div>
+	</div>
+	<div class="row">
+	<div class="col-lg-7">
+		<svg class="canvas">
+			<g transform="translate(350,300)">
+				<circle cx="0" cy="0" r="20" fill="yellow" id="sol"/>
+				
+				
+				<circle cx="0" cy="0" r="50" fill="rgba(0,0,0,0)" stroke="lightgray" id="p1-trayectoria"/>
+				<circle cx="0" cy="0" r="100" fill="rgba(0,0,0,0)" stroke="lightgray" id="p2-trayectoria"/>
+				<circle cx="0" cy="0" r="200" fill="rgba(0,0,0,0)" stroke="lightgray" id="p3-trayectoria"/>
+				
+				<circle cx="0" cy="-50" r="5" fill="blue" id="p1" />
+				
+				<circle cx="0" cy="-100" r="5" fill="red" id="p2" />
+				
+				<circle cx="0" cy="-200" r="5" fill="green" id="p3"/>
+			</g>
+		</svg>
+	</div>
+	<div class="col-lg-4">
+	<h1>
+		<div id="fecha">
+		</div>
+	</h1>
+	<h3>
+		Sequias:
+	</h3>
+	<ul id="sequias">
+	</ul>
+	</div>
+  </div>  
+  <br>
+</div>
+
+</body>
+<script>
+
+var p1,p2,p3;
+var angulo_inicial = 0
+var p1c,p2c,p3c;
+var fecha = 0;
+var avance_de_fecha = (1/24)
+	
+
+class Planeta{
+	constructor(angulo,radio,velocidad_angular){
+	this.a = angulo;
+	this.r = radio;
+	this.v = velocidad_angular
+	}
+	
+	x(){return this.r * Math.cos(this.a);}	
+	y(){return this.r * Math.sin(this.a);}
+}
+
+p1 = new Planeta(angulo_inicial, 50,  1)
+p2 = new Planeta(angulo_inicial,100, -5)
+p3 = new Planeta(angulo_inicial,200,  3)
+sol = new Planeta(angulo_inicial,0,0)
+
+//p1 = { r: 50, a: angulo_inicial};
+//p2 = { r: 100, a: angulo_inicial};
+//p3 = { r: 200, a: angulo_inicial};
+	
+p1c = d3.select("#p1")
+p2c = d3.select("#p2")
+p3c = d3.select("#p3")
+
+avanzar(p1c,p1,0);
+avanzar(p2c,p2,0);
+avanzar(p3c,p3,0);
+
+
+function go(){
+	
+	setInterval(function() {
+	
+		fecha = fecha + avance_de_fecha;	
+		
+		$("#fecha").html("Fecha estelar: " + (Math.round(fecha*10)/10));
+		
+		if(alineados(p1,p2,p3,sol)){
+			$("#sequias").append("<li>Fecha estelar: " + (Math.round(fecha*10)/10) + "</li>");
+		}
+		
+		avanzar(p1c,p1,0.01);
+		avanzar(p2c,p2,-0.05);
+		avanzar(p3c,p3,0.03);		
+		}, 50);
+	}
+
+
+function avanzar( circle, model , grados){
+
+	model.a = model.a + grados;
+
+	circle.attr("cx",  function() { 
+		return model.x()
+	});
+		
+	circle.attr("cy", function() {
+		return model.y() * -1
+	});	
+}	
+
+function alineados(p1,p2,p3,sol){
+
+	let m = (p2.y() - p1.y()) / (p2.x() - p1.x())
+	let b = p1.y() - m * p1.x()
+	
+	let y3_calculada = m * p3.x() + b
+	y3_calculada = Math.round( y3_calculada * 10) / 10
+	
+	let y3_redondeada = Math.round( p3.y() * 10) / 10
+	
+	let sol_y_calculada = m * sol.x() + b
+	sol_y_calculada = Math.round( y3_calculada * 10) / 10
+	
+	let sol_y_redondeada = 	Math.round( sol.y() * 10) / 10
+	
+	return ( sol_y_calculada == sol_y_redondeada && y3_redondeada == y3_calculada)
+
+}
+	
+</script>
+
+</html>

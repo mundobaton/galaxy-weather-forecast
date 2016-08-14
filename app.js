@@ -16,6 +16,10 @@ app.get('/weatherforecast/dia/:diaId', function (req, res) {
 	});
 });
 
+app.get('/planetas', function(req, res) {
+	res.redirect('/planetas.html');
+});
+
 app.listen(8080, function () {
   console.log('Example app listening on port 8080!');
 });
