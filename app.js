@@ -16,8 +16,9 @@ app.get('/weatherforecast/dia/:diaId', function (req, res) {
 	});
 });
 
-app.get('/planetas', function(req, res) {
-	res.redirect('/planetas.html');
+app.get('/weatherforechast/planetas', function(req, res) {
+	console.log('entra');
+	res.redirect('planetas.html');
 });
 
 app.listen(8080, function () {
